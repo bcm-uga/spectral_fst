@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1618391310549.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "C672709E",
+    "lastKnownWriteTime" : 1618305925,
+    "last_content_update" : 1618305925,
+    "path" : "~/Documents/Rwork/spectraltheory/spectral_package/spectral_theory.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "175,1",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
