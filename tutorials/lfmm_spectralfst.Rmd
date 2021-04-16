@@ -7,7 +7,7 @@ Open the data
 
 ```{r}
 source('../R/lfmm.R')
-source('../R/spectral_theory.R')
+source('../R/spectral_fst.R')
 ```
 
 
@@ -27,8 +27,11 @@ wright_fst_athaliana <- mean_wright_fst(genotype_athaliana, pop_athaliana)
 ```
 
 ```{r}
+print("mean Fst compute with wright formula :")
 wright_fst_athaliana
+print("Fst compute with between population matrix Zst")
 spectral_athaliana$Fst
+print("Fst estimation using Z matrix")
 spectral_athaliana$Fst_estimate
 ```
 
@@ -48,7 +51,9 @@ spectral_adjusted_athaliana <- compute_partition(adjusted_genotype, pop_athalian
 ```
 
 ```{r}
+print("Fst compute with between population matrix Zst")
 spectral_adjusted_athaliana$Fst
+print("Fst estimation using Z matrix")
 spectral_adjusted_athaliana$Fst_estimate
 ```
 
@@ -93,7 +98,5 @@ legend(x = 3.5, y = 0.077,
        cex = 1)
 ```
 
-```{r}
 
-```
 
