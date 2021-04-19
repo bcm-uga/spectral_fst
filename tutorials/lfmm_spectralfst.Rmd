@@ -98,5 +98,23 @@ legend(x = 3.5, y = 0.077,
        cex = 1)
 ```
 
+Computing Fst using new formula
 
+```{r}
+Z_athaliana <- scale(genotype_athaliana)
+s_athaliana <- summary(lm(Z_athaliana~ as.factor(pop_athaliana)))
+f_athaliana <- sapply(s_athaliana, FUN=function(smr) smr$r.squared)
+mean(f_athaliana)
+```
+
+We obtain the same results. Let's check with adjusted genotype
+
+```{r}
+Z_adjusted <- scale(adjusted_genotype)
+s_adjusted<- summary(lm(Z_adjusted~ as.factor(pop_athaliana)))
+f_adjusted <- sapply(s_adjusted, FUN=function(smr) smr$r.squared)
+mean(f_adjusted)
+```
+
+The new formula is working properly
 
