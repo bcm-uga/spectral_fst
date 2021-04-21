@@ -1,24 +1,39 @@
 
 #' @title compute_partition
 #
-#' @description This function aims at computing matrices that we define in the paper as within population matrix Zs and between population matrix Zst
+#' @description This function aims at computing matrices that we define in the paper as within population matrix Zs and between population matrix Zst. From these matrices, it computes related quantities such as the mean Fst over loci, the approximation of Fst using Z matrix, random matrix theory (RMT) prediction.. Here, n corresponds to the number of individuals and L to the number of locus.
 #
-#' @param genotype A genotype matrix of haploid or transformed haploid individuals with n rows and p columns.
+#' @param genotype A genotype matrix of n rows and L columns. The matrix can be composed of haploid, transformed haploid or diploid individuals.
 #' @param population_assignement A vector of length n, each element is the population of the corresponding individual in genotype matrix
-#
+#' @param make_adjustment A logical value that specifies whether you want to compute some correction on your genotype or not.
+#' @param adjusting_variables An optional matrix of n rows and d columns where d is the number of adjusting variables. This matrix has to be specify when make_adjustment is TRUE.
+#'
 #' @return spectral_result
-#' Zs : The within population matrix Zs
-#' Zst : The between population matrix Zst
-#' Fst : Squared norm of Zst
-#' Fst_estimate : the sum of the first (nb_pop − 1) eigenvalues of scaled PCA for genotype matrix
-#' leadingeigenZs : The leading eigenvalue of Zs
-#' MPestimate : the estimation of Marchenko Pastur
-#' eigenZs : eigenvalues of scaled Zs
-#' eigenZst : eigenvalues of scaled Zst
-#' eigenZ : eigenvalues of scaled Z
+#' Zs : A matrix of n rows and L columns in the case of haploid genotype, 2*n rows and L columns in the case of diploid genotype. It corresponds to the within population matrix Zs
+#' Zst : A matrix of n rows and L columns in the case of haploid genotype, 2*n rows and L columns in the case of diploid genotype. It corresponds to the between population matrix Zst
+#' Fst : A real value. It is computed using the squared norm of Zst and it is equal to the average value of Wright's Fst over all loci included in the genotype matrix
+#' Fst_approximation : A real value. The sum of the first (nb_pop − 1) eigenvalues of scaled PCA for genotype matrix Z
+#' leadingeigenZs : A real value. The leading eigenvalue of Zs
+#' RMTprediction : A real value. The prediction of the leading eigenvalue of the residual matrix using RMT
+#' eigenZs : A vector of length n for haploid genotype, 2*n for diploid. It corresponds to the eigenvalues of scaled Zs
+#' eigenZst : A vector of length n for haploid genotype, 2*n for diploid. It corresponds to the eigenvalues of scaled Zst
+#' eigenZ : A vector of length n for haploid genotype, 2*n for diploid. It corresponds to the eigenvalues of scaled Z
+#' pcZs : A matrix of size n \times 2 for haploid genotype, 2n \times 2 for diploid. The projection of Zs on 2 first axis of PCA
+#' pcZst : A matrix of size n \times 2 for haploid genotype, 2n \times 2 for diploid. The projection of Zst on 2 first axis of PCA
+#' pcZ : A matrix of size n \times 2 for haploid genotype, 2n \times 2 for diploid. The projection of Z on 2 first axis of PCA
 
-compute_partition <- function(genotype, population_assignment){
 
+compute_partition <- function(genotype, population_assignment, make_adjustment=F, adjusting_variables=NULL){
+
+  # Several check before running the functions
+  # non null values
+
+  # Check if it is a diploid matrix
+  if (2 %in% genotype){
+    haploid_object <- haploidisation(genotype, population_assignment)
+    genotype <- haploid_object$haploid_matrix
+    population_assignment <- haploid_object$haploid_population_assignment
+  }
   # unique_pop stores all distinct population identifier
 
   unique_pop <- sort(unique(population_assignment))
@@ -32,6 +47,18 @@ compute_partition <- function(genotype, population_assignment){
   # store n and L values
   n <- dim(genotype)[1]
   L <- dim(genotype)[2]
+
+  # If you want to adjust for variables (e.g coverage or environmental variables)
+
+  if (make_adjustment){
+    nb_var <- ncol(adjusting_variables)
+    lfmm_genotype <- lfmm2(genotype, adjusting_variables, n-(nb_var + 1))
+    mod.lm <- lm(genotype ~ ., data=data.frame(adjusting_variables, lfmm_genotype@U))
+    sm <- summary(mod.lm)
+    effect.size <- sapply(sm, FUN = function(x) x$coeff[1:(nb_var + 1), 1])
+    adjusting_variables <- cbind(rep(1.0, n), adjusting_variables)
+    genotype <- genotype - adjusting_variables %*% effect.size
+  }
 
   # store mean and sd for each column
   colmean <- colMeans(genotype)
@@ -80,17 +107,17 @@ compute_partition <- function(genotype, population_assignment){
 
 
   Fst <- sum(pc_z_st$sdev^2 / L)
-  Fst_estimate <- sum((pc_z$sdev^2 / L)[1:(nb_pop-1)])
+  Fst_approximation <- sum((pc_z$sdev^2 / L)[1:(nb_pop-1)])
   leadingeigenZs <- (pc_z_s$sdev^2 / L)[1]
 
   #==========================================#
   #         Marchenko Pastur estimate        #
   #==========================================#
 
-  MPestimate <- (1 - Fst)*((1/sqrt(n-nb_pop)) + (1/sqrt(L)))^2
+  RMTprediction <- (1 - Fst)*((1/sqrt(n-nb_pop)) + (1/sqrt(L)))^2
 
 
-  return(list(Zs = Zs, Zst=Zst, Fst=Fst, Fst_estimate=Fst_estimate, leadingeigenZs=leadingeigenZs, MPestimate=MPestimate, eigenZs=pc_z_s$sdev^2/L, eigenZst=pc_z_st$sdev^2/L, eigenZ=pc_z$sdev^2/L))
+  return(list(Zs = Zs, Zst=Zst, Fst=Fst, Fst_approximation=Fst_approximation, leadingeigenZs=leadingeigenZs, RMTprediction=RMTprediction, eigenZs=pc_z_s$sdev^2/L, eigenZst=pc_z_st$sdev^2/L, eigenZ=pc_z$sdev^2/L, pcZs = pc_z_s$x[,1:2], pcZst = pc_z_st$x[,1:2], pcZ = pc_z$x[,1:2]))
 }
 
 

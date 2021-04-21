@@ -11,7 +11,7 @@ haploidisation(genotype, population_assignment)
 }
 \arguments{
   \item{genotype}{
-  A genotype matrix of diploid individuals with n rows (=individuals) and p columns (=loci).
+  A genotype matrix of diploid individuals with n rows (=individuals) and L columns (=loci).
 }
   \item{population_assignment}{
     A vector of length n, each element is the population of the corresponding individual in genotype matrix
@@ -19,8 +19,8 @@ haploidisation(genotype, population_assignment)
 }
 
 \value{
-\item{haploid_genotype}{The corresponding haploid matrix}
-\item{haploid_population_assignment}{The new vector of population assignment corresponding to the new haploid matrix}
+\item{haploid_genotype}{A genotype matrix of 2*n rows and L columns. The corresponding haploid matrix}
+\item{haploid_population_assignment}{A vector of size 2*n. The new vector of population assignment corresponding to the new haploid matrix}
 }
 \references{
 %% ~put references to the literature/web site here ~

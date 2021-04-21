@@ -8,27 +8,8 @@ setClass("lfmm2Class",
          )
 )
 
-read.lfmm <- function(input.file) {
 
-  # test arguments
-  if(missing(input.file))
-    stop("'input.file' argument is missing.")
-  else if (!is.character(input.file))
-    stop("'input.file' argument has to be of type character.")
 
-  return(as.matrix(read.table(input.file)))
-}
-
-read.env <- function(input.file) {
-
-  # test arguments
-  if(missing(input.file))
-    stop("'input.file' argument is missing.")
-  else if (!is.character(input.file))
-    stop("'input.file' argument has to be of type character.")
-
-  return(as.matrix(read.table(input.file)));
-}
 
 lfmm2 <- function(input,
                   env,
