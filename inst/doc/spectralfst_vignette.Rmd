@@ -1,0 +1,250 @@
+---
+title: "Spectral Fst on F model with 3 populations and on surrogate genotypes"
+author: "Clement Gain"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Spectral Fst on F model with 3 populations and on surrogate genotypes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette aims at showing some results presented in the paper "A Spectral Theory for Wright's Inbreeding Coefficients and Related Quantities". This vignette is composed of 2 big parts.
+
+* The first part apply spectral theory on datas coming from a F model with 3 populations. There are several steps in this part : 
++ Simulation of the datas using F model with 3 populations
++ Computing the average value of Wright’s FST over all loci included in the genotype matrix using Wright's formula (this can be computed using the package function **mean_wright_fst** )
++ Computing the average value of Wright’s FST over all loci included in the genotype matrix using the squared norm of the between population matrix Zst (this can be computed using the package function **compute_partition**)
++ Computing several quantities of interests
++ scree plot anf projection of PCA from matrix Z, Zs and Zst
+
+* The aim of the second part is to show the usefulness of spectral theory in order to compute Fst of surrogate genotype. In this example, we're going to use genotype data coming from Arabidopsis Thaliana and the goal is to obtain the Fst after removing adaptive genetic variation associated with environmental variables (Bioclim 1 to 18 coming from WorldClim database). This can be done using the *make_adjustment* and *adjusting_variables* parameters from the **compute_partition** function.
+
+The only required package is *spectral_fst*
+
+```{r}
+library(spectralfst)
+```
+
+# I - F model with 3 populations 
+
+## Data simulation
+
+Here, we use a F model with 3 populations to simulate our datas. 
+
+```{r}
+## parameters F model
+F1 = 0.3
+F2 = 0.2
+F3 = 0.1
+
+L = 20000
+n = 150
+c = c(1/3,1/3,1/3)
+
+
+# genotype matrices
+X <- matrix(NA, nrow = n, ncol = L)
+n1 <- round(n*c[1])
+n2 <- round(n*c[2])
+n3 <- n - n1 - n2 
+
+
+for (l in 1:L){
+  p <- runif(1)
+  p1 <- rbeta(1, p*(1-F1)/F1, (1-p)*(1-F1)/F1)
+  p2 <- rbeta(1, p*(1-F2)/F2, (1-p)*(1-F2)/F2)
+  p3 <- rbeta(1, p*(1-F3)/F3, (1-p)*(1-F3)/F3)  
+  X[1:n1,l] <- rbinom(n1, size = 1, prob = p1)
+  X[(n1+1):(n1+n2),l] <- rbinom(n2, size = 1, prob = p2)
+  X[(n1+n2+1):n,l] <- rbinom(n3, size = 1, prob = p3)  
+}
+
+## SNPs filtering
+boo.unique <- apply(X, 2, FUN = function(x) length(unique(x))) == 1
+X <- X[,!boo.unique]
+L <- ncol(X)
+
+# Population_assignment vector creation
+
+pop <- c(rep(1,n1), rep(2,n2), rep(3,n3))
+```
+
+```{r}
+dim(X)
+```
+
+Our genotype matrix is composed of n = 150 individuals and L = 18915 loci
+
+## Average value of Wright’s FST
+
+We're going to compute average value of wright's Fst using the formula :
+
+```{r}
+fst_wright <- mean_wright_fst(X, pop)
+print("Wright's formula gives a mean fst of : ")
+fst_wright
+```
+
+and using the spectral theory, more specifically using the squared norm of the between population matrix
+
+```{r}
+spectral_fst <- compute_partition(X, pop)
+print("Fst compute with between population matrix Zst")
+spectral_fst$Fst
+```
+
+Those 2 values are strictly equal and will be equal for any case
+
+## Related quantities
+
+We can obtain a Fst approximation by computing the centered scaled PCA of genotype matrix
+
+```{r}
+print("Fst approximation using Z matrix")
+spectral_fst$Fst_approximation
+```
+
+We also can obtain the leading eigenvalue of Zs matrix
+
+```{r}
+print("The leading eigenvalue of Zs matrix is :")
+spectral_fst$leadingeigenZs
+```
+
+```{r}
+print("The RMT prediction of the leading eigenvalue of Zs is : ")
+spectral_fst$RMTprediction
+```
+
+## PC plots of Z, Zs and Zst
+
+For Z (i.e genotype) matrix
+
+```{r, fig.show='hold'}
+plot(spectral_fst$eigenZ[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
+plot(spectral_fst$pcZ, col = pop, main="PC Plot")
+```
+
+For Zst matrix : 
+
+```{r, fig.show='hold'}
+plot(spectral_fst$eigenZst[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
+plot(spectral_fst$pcZst, col = pop, main="PC Plot")
+```
+
+It is important to notice that in the case of Fmodel, these plots are really close
+
+For Zs matrix : 
+
+```{r, fig.show='hold'}
+plot(spectral_fst$eigenZs[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
+plot(spectral_fst$pcZs, col = pop, main="PC Plot")
+```
+
+# II - Fst computation after removing  adaptive genetic variation associated with environmental variables
+
+## Loading datas
+
+```{r}
+data('genotype_athaliana')
+data('env_var')
+data('pop_athaliana')
+```
+
+```{r}{r setup, include = FALSE}
+# For some reason, you'll sometimes need to compute load_all() function in order to load correctly datasets
+# see https://github.com/r-lib/devtools/issues/419 for more infos
+#load_all()
+```
+
+
+## Computing Fst on the genotype matrix without adjustment
+
+First, we're not realizing any adjustment.
+
+```{r}
+spectral_athaliana <- compute_partition(genotype_athaliana, pop_athaliana)
+wright_fst_athaliana <- mean_wright_fst(genotype_athaliana, pop_athaliana)
+
+print("mean Fst compute with Wright's formula :")
+wright_fst_athaliana
+print("Fst compute with between population matrix Zst")
+spectral_athaliana$Fst
+print("Fst approximation using Z matrix")
+spectral_athaliana$Fst_approximation
+```
+
+## Adjusting for adaptive genetic variation associated with environmental variables 
+
+We're now going to use the make_adjustment and adjusting_variables parameters. The adjusting_variables will be composed of the 18 Bioclim variables. It must be a n (= number of individuals) x D (= number of environmental variables) matrix. In our specific case, the matrix has 241 rows and 18 columns
+
+```{r}
+spectral_adjusted_athaliana <- compute_partition(genotype_athaliana, pop_athaliana, make_adjustment = T, adjusting_variables = env_var)
+
+print("Fst compute with between population matrix Zst")
+spectral_adjusted_athaliana$Fst
+print("Fst approximation using Z matrix")
+spectral_adjusted_athaliana$Fst_approximation
+```
+
+We can see that removing adaptive genetic variation has logically led to a decrease of Fst value
+
+## Figures
+
+
+Proportion of variance explained by PC axes before adjustment of genotypes for environmental variables (blue color) and after adjustment (orange color).
+
+```{r}
+m <- cbind(spectral_athaliana$eigenZ[1:6],spectral_adjusted_athaliana$eigenZ[1:6])
+plot(seq(1,12)/2,as.numeric(t(m)),
+     col = rep(c("darkblue","orange"), length = 12), 
+     type = "h", lwd = 10, 
+     ylab = "Proportion of variance",
+     xlab = "PC axis",
+    # main = "PCA",
+     cex.axis = .9,
+     las = 1)
+
+legend(x = 3.5, y = 0.081, 
+       legend = c("All SNPs", "Adjusted data"),
+       col = c("darkblue","orange"),
+       lty = c(1,1),
+       pch = 19,
+       cex = 1)
+```
+
+
+
+Proportion of variance explained by the first axis of the between-population matrix, and by the first axes ofthe residual matrix (five components) before adjustment for environmental variables(blue color) and after adjustment (orange color). 
+
+```{r}
+m <- cbind(c(spectral_athaliana$eigenZst[1], spectral_athaliana$eigenZs[1:5]),
+           c(spectral_adjusted_athaliana$eigenZst[1], spectral_adjusted_athaliana$eigenZs[1:5]))
+plot(seq(1,12)/2,as.numeric(t(m)), 
+     col = rep(c("lightblue","orange"), length = 12), 
+     type = "h", lwd = 10, 
+     ylab = "Proportion of variance",
+     xlab = "PC axis",
+    # main = "Structure Components",
+     cex.axis = .9,
+     las = 1)
+
+legend(x = 3.5, y = 0.077, 
+       legend = c("All SNPs", "Adjusted data"),
+       col = c("lightblue","orange"),
+       lty = c(1,1),
+       pch = 19,
+       cex = 1)
+```
+
+
+
+
