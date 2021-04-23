@@ -12,4 +12,4 @@ VignetteBuilder: knitr
 LazyData: true
 RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2021-04-23 15:16:40 UTC; gainc
+Packaged: 2021-04-23 16:25:50 UTC; gainc

@@ -105,7 +105,7 @@ spectral_adjusted_athaliana$Fst
 print("Fst approximation using Z matrix")
 spectral_adjusted_athaliana$Fst_approximation
 
-## ------------------------------------------------------------------------
+## ---- fig.width = 7, fig.height = 7--------------------------------------
 m <- cbind(spectral_athaliana$eigenZ[1:6],spectral_adjusted_athaliana$eigenZ[1:6])
 plot(seq(1,12)/2,as.numeric(t(m)),
      col = rep(c("darkblue","orange"), length = 12), 
@@ -123,7 +123,7 @@ legend(x = 3.5, y = 0.081,
        pch = 19,
        cex = 1)
 
-## ------------------------------------------------------------------------
+## ---- fig.width = 7, fig.height = 7--------------------------------------
 m <- cbind(c(spectral_athaliana$eigenZst[1], spectral_athaliana$eigenZs[1:5]),
            c(spectral_adjusted_athaliana$eigenZst[1], spectral_adjusted_athaliana$eigenZs[1:5]))
 plot(seq(1,12)/2,as.numeric(t(m)), 

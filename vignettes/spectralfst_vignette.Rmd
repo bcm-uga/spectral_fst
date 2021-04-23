@@ -202,7 +202,7 @@ We can see that removing adaptive genetic variation has logically led to a decre
 
 Proportion of variance explained by PC axes before adjustment of genotypes for environmental variables (blue color) and after adjustment (orange color).
 
-```{r}
+```{r, fig.width = 7, fig.height = 7}
 m <- cbind(spectral_athaliana$eigenZ[1:6],spectral_adjusted_athaliana$eigenZ[1:6])
 plot(seq(1,12)/2,as.numeric(t(m)),
      col = rep(c("darkblue","orange"), length = 12), 
@@ -225,7 +225,7 @@ legend(x = 3.5, y = 0.081,
 
 Proportion of variance explained by the first axis of the between-population matrix, and by the first axes ofthe residual matrix (five components) before adjustment for environmental variables(blue color) and after adjustment (orange color). 
 
-```{r}
+```{r, fig.width = 7, fig.height = 7}
 m <- cbind(c(spectral_athaliana$eigenZst[1], spectral_athaliana$eigenZs[1:5]),
            c(spectral_adjusted_athaliana$eigenZst[1], spectral_adjusted_athaliana$eigenZs[1:5]))
 plot(seq(1,12)/2,as.numeric(t(m)), 
