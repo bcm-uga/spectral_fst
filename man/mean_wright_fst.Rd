@@ -19,29 +19,21 @@ mean_wright_fst(genotype, population_assignment)
   A vector of length n, each element is the population of the corresponding individual in genotype   matrix
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+
 \value{
 The mean value of Fst
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
+# Loading datas from package
+data('genotype_athaliana')
+data('pop_athaliana')
+
+wright_fst_athaliana <- mean_wright_fst(genotype_athaliana, pop_athaliana)
+
+print("mean Fst compute with Wright's formula :")
+wright_fst_athaliana
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
+
 

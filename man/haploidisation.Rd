@@ -22,22 +22,20 @@ haploidisation(genotype, population_assignment)
 \item{haploid_genotype}{A genotype matrix of 2*n rows and L columns. The corresponding haploid matrix}
 \item{haploid_population_assignment}{A vector of size 2*n. The new vector of population assignment corresponding to the new haploid matrix}
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
-\author{
-%%  ~~who you are~~
-}
-\note{
-%%  ~~further notes~~
-}
 
-%% ~Make other sections like Warning with \section{Warning }{....} ~
 
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
+
 \examples{
+# Creation of a diploid matrix
 
+diploid_matrix <- rbind(c(0,1,2),c(2,2,2))
+diploid_pop <-  c(1,2)
+
+hap_process <- haploidisation(diploid_matrix, diploid_pop)
+
+# New haploid matrix and population assignment vector
+
+haploid_matrix <- hap_process$haploid_matrix
+haploid_pop <- hap_process$haploid_population_assignment
 }
 

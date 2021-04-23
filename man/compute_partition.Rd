@@ -44,5 +44,22 @@ An optional matrix of n rows and d columns where d is the number of adjusting va
 }
 
 \examples{
-See tutorials directory
+
+# Loading datas from package
+data('genotype_athaliana')
+data('env_var')
+data('pop_athaliana')
+
+# We compute Fst after removing adaptive genetic variation associated with environmental variables
+
+spectral_adjusted_athaliana <- compute_partition(genotype_athaliana, pop_athaliana, make_adjustment = T, adjusting_variables = env_var)
+
+print("Fst compute with between population matrix Zst")
+spectral_adjusted_athaliana$Fst
+print("Fst approximation using Z matrix")
+spectral_adjusted_athaliana$Fst_approximation
+}
+
+\references{
+François, O., Gain, C., (2021). A Spectral Theory for Wright’s Inbreeding Coefficients and Related Quantities. Under Review.
 }
