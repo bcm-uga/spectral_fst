@@ -1,6 +1,7 @@
 Package: spectralfst
 Type: Package
-Title: Spectral Theory for Wright’s Inbreeding Coefficients and Related Quantities
+Title: Spectral Theory for Wright’s Inbreeding Coefficients and Related
+        Quantities
 Version: 0.1.0
 Author: Clement Gain
 Maintainer: Clement Gain <clement.gain@univ-grenoble-alpes.fr>
@@ -10,3 +11,5 @@ Encoding: UTF-8
 VignetteBuilder: knitr
 LazyData: true
 RoxygenNote: 7.1.1
+NeedsCompilation: no
+Packaged: 2021-04-23 09:46:52 UTC; gainc
