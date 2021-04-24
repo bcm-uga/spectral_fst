@@ -1,0 +1,14 @@
+.Rhistory
+.RData
+.Ruserdata
+.DS_Store
+.Rbuildignore
+
+.Rproj.user
+spectralfst.Rproj
+
+R/.Rapp.history
+inst/doc
+
+readme_changes.txt
+
