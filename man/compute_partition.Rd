@@ -1,15 +1,12 @@
 \name{compute_partition}
 \alias{compute_partition}
-\title{Computing partition matrices and related quantities from spectral theory}
+\title{Spectral estimates of inbreeding coefficients from multilocus genotypes}
 \usage{
-## No adjustment
-compute_partition ( genotype, population_assignment)
 
-## With adjustment
-compute_partition ( genotype, population_assignment, make_adjustment = TRUE, adjusting_variables)
+compute_partition ( genotype, population_assignment, Y=NULL )
 }
 \description{
-This function aims at computing matrices that we define in the paper as within population matrix Zs and between population matrix Zst. From these matrices, it computes related quantities such as the mean Fst over loci, the approximation of Fst using Z matrix, random matrix theory (RMT) prediction.. Here, n corresponds to the number of individuals and L to the number of locus.
+This function computes a within-population (residual) matrix, Zs, and a between-population matrix, Zst, for a genotype matrix, Z, and for K predefined populations. It allows the genotype matrix to  be adjusted for specific covariates, Y, representing technical effects, such as coverage, or environmental variables, such as bioclimatic data. The function returns a spectral estimate of the average value of Fst across loci, an approximation of Fst by PCA eigenvalues, and the leading eigenvalue of the residual matrix.
 }
 
 \arguments{
@@ -46,13 +43,11 @@ An optional matrix of n rows and d columns where d is the number of adjusting va
 \examples{
 
 # Loading datas from package
-data('genotype_athaliana')
-data('env_var')
-data('pop_athaliana')
+data('athaliana')
 
 # We compute Fst after removing adaptive genetic variation associated with environmental variables
 
-spectral_adjusted_athaliana <- compute_partition(genotype_athaliana, pop_athaliana, make_adjustment = T, adjusting_variables = env_var)
+spectral_adjusted_athaliana <- compute_partition(athaliana$genotype, athaliana$pop, athaliana$bio)
 
 print("Fst compute with between population matrix Zst")
 spectral_adjusted_athaliana$Fst

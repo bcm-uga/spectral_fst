@@ -154,7 +154,7 @@ spectral_athaliana$Fst_approximation
 We're now going to use the make_adjustment and adjusting_variables parameters. The adjusting_variables will be composed of the 18 Bioclim variables. It must be a n (= number of individuals) x D (= number of environmental variables) matrix. In our specific case, the matrix has 241 rows and 18 columns
 
 ```{r}
-spectral_adjusted_athaliana <- compute_partition(athaliana$genotype, athaliana$pop, make_adjustment = T, adjusting_variables = athaliana$bio)
+spectral_adjusted_athaliana <- compute_partition(athaliana$genotype, athaliana$pop, Y =athaliana$bio)
 
 print("Fst compute with between population matrix Zst")
 spectral_adjusted_athaliana$Fst
