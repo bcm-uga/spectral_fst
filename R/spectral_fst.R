@@ -44,7 +44,9 @@ compute_partition <- function(genotype, population_assignment, make_adjustment=F
   pop_count <- table(population_assignment)
   pop_distribution <- pop_count / sum(pop_count)
 
-
+  # store n and L values
+  n <- dim(genotype)[1]
+  L <- dim(genotype)[2]
 
   # If you want to adjust for variables (e.g coverage or environmental variables)
 
@@ -58,6 +60,7 @@ compute_partition <- function(genotype, population_assignment, make_adjustment=F
     genotype <- genotype - adjusting_variables %*% effect.size
   }
 
+
   # store mean and sd for each column
   colmean <- colMeans(genotype)
   colsd <- apply(genotype, 2, sd)
@@ -65,13 +68,9 @@ compute_partition <- function(genotype, population_assignment, make_adjustment=F
   genotype <- genotype[,colsd != 0]
   colmean <- colmean[colsd != 0]
   colsd <- colsd[colsd != 0]
-
-
-
-
-  # store n and L values
-  n <- dim(genotype)[1]
+  # Updata of L values in case of column deletion
   L <- dim(genotype)[2]
+
 
 
   #==============================#

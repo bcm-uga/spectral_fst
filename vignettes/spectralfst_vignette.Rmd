@@ -33,6 +33,7 @@ The only required package is *spectral_fst*
 library(spectralfst)
 ```
 
+
 # I - F model with 3 populations 
 
 ## Data simulation
@@ -153,11 +154,7 @@ plot(spectral_fst$pcZs, col = pop, main="PC Plot")
 
 ## Loading datas
 
-```{r}
-data('genotype_athaliana')
-data('env_var')
-data('pop_athaliana')
-```
+
 
 ```{r}{r setup, include = FALSE}
 # For some reason, you'll sometimes need to compute load_all() function in order to load correctly datasets
@@ -165,14 +162,16 @@ data('pop_athaliana')
 #load_all()
 ```
 
-
+```{r}
+data('athaliana')
+```
 ## Computing Fst on the genotype matrix without adjustment
 
 First, we're not realizing any adjustment.
 
 ```{r}
-spectral_athaliana <- compute_partition(genotype_athaliana, pop_athaliana)
-wright_fst_athaliana <- mean_wright_fst(genotype_athaliana, pop_athaliana)
+spectral_athaliana <- compute_partition(athaliana$genotype, athaliana$pop)
+wright_fst_athaliana <- mean_wright_fst(athaliana$genotype, athaliana$pop)
 
 print("mean Fst compute with Wright's formula :")
 wright_fst_athaliana
@@ -187,7 +186,7 @@ spectral_athaliana$Fst_approximation
 We're now going to use the make_adjustment and adjusting_variables parameters. The adjusting_variables will be composed of the 18 Bioclim variables. It must be a n (= number of individuals) x D (= number of environmental variables) matrix. In our specific case, the matrix has 241 rows and 18 columns
 
 ```{r}
-spectral_adjusted_athaliana <- compute_partition(genotype_athaliana, pop_athaliana, make_adjustment = T, adjusting_variables = env_var)
+spectral_adjusted_athaliana <- compute_partition(athaliana$genotype, athaliana$pop, make_adjustment = T, adjusting_variables = athaliana$bio)
 
 print("Fst compute with between population matrix Zst")
 spectral_adjusted_athaliana$Fst
