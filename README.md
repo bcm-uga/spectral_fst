@@ -16,7 +16,7 @@ The main function of the package is
 Install the latest version from github (requires [devtools](https://github.com/hadley/devtools)):
 ```R
 # install.packages("devtools")
-devtools::install_github("bcm-uga/spectral_fst")
+devtools::install_github("bcm-uga/spectralfst")
 ```
 
 ## References
