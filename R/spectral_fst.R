@@ -44,9 +44,7 @@ compute_partition <- function(genotype, population_assignment, make_adjustment=F
   pop_count <- table(population_assignment)
   pop_distribution <- pop_count / sum(pop_count)
 
-  # store n and L values
-  n <- dim(genotype)[1]
-  L <- dim(genotype)[2]
+
 
   # If you want to adjust for variables (e.g coverage or environmental variables)
 
@@ -63,6 +61,18 @@ compute_partition <- function(genotype, population_assignment, make_adjustment=F
   # store mean and sd for each column
   colmean <- colMeans(genotype)
   colsd <- apply(genotype, 2, sd)
+  # We get rid of potential 0 variance column
+  genotype <- genotype[,colsd != 0]
+  colmean <- colmean[colsd != 0]
+  colsd <- colsd[colsd != 0]
+
+
+
+
+  # store n and L values
+  n <- dim(genotype)[1]
+  L <- dim(genotype)[2]
+
 
   #==============================#
   # We compute Zst and Zs matrix #
@@ -111,7 +121,7 @@ compute_partition <- function(genotype, population_assignment, make_adjustment=F
   leadingeigenZs <- (pc_z_s$sdev^2 / L)[1]
 
   #==========================================#
-  #         Marchenko Pastur estimate        #
+  #        Random Matrix prediction          #
   #==========================================#
 
   RMTprediction <- (1 - Fst)*((1/sqrt(n-nb_pop)) + (1/sqrt(L)))^2
