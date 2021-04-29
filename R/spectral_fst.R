@@ -28,9 +28,10 @@ compute_partition <- function(genotype, population_labels, Y=NULL){
 
   # Several check before running the functions
   # non null values
-
   # Check if it is a diploid matrix
+  diploid <- FALSE
   if (2 %in% genotype){
+    diploid <- TRUE
     haploid_object <- haploidisation(genotype, population_labels)
     genotype <- haploid_object$haploid_matrix
     population_labels <- haploid_object$haploid_population_labels
@@ -53,7 +54,11 @@ compute_partition <- function(genotype, population_labels, Y=NULL){
 
   if (! is.null(Y)){
     nb_var <- ncol(Y)
-    lfmm_genotype <- lfmm2(genotype, Y, n-(nb_var + 1))
+    if (diploid){
+      lfmm_genotype <- lfmm2(genotype, Y, (n/2)-(nb_var + 1))
+    }else{
+      lfmm_genotype <- lfmm2(genotype, Y, n-(nb_var + 1))
+    }
     mod.lm <- lm(genotype ~ ., data=data.frame(Y, lfmm_genotype@U))
     sm <- summary(mod.lm)
     effect.size <- sapply(sm, FUN = function(x) x$coeff[1:(nb_var + 1), 1])
@@ -124,8 +129,11 @@ compute_partition <- function(genotype, population_labels, Y=NULL){
   #        Random Matrix prediction          #
   #==========================================#
 
-  RMTprediction <- (1 - Fst)*(((1/sqrt(n-nb_pop)) + (1/sqrt(L)))**2)
-
+  if (diploid){
+    RMTprediction <- (1 - Fst)*(((1/sqrt((n/2)-nb_pop)) + (1/sqrt(L)))**2)
+  }else{
+    RMTprediction <- (1 - Fst)*(((1/sqrt(n-nb_pop)) + (1/sqrt(L)))**2)
+  }
 
   return(list(Zs = Zs, Zst=Zst, Fst=Fst, Fst_approximation=Fst_approximation, leadingeigenZs=leadingeigenZs, RMTprediction=RMTprediction, eigenZs=pc_z_s$sdev^2/L, eigenZst=pc_z_st$sdev^2/L, eigenZ=pc_z$sdev^2/L, pcZs = pc_z_s$x[,1:2], pcZst = pc_z_st$x[,1:2], pcZ = pc_z$x[,1:2]))
 }
