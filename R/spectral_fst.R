@@ -124,7 +124,7 @@ compute_partition <- function(genotype, population_labels, Y=NULL){
   #        Random Matrix prediction          #
   #==========================================#
 
-  RMTprediction <- (1 - Fst)*((1/sqrt(n-nb_pop)) + (1/sqrt(L)))^2
+  RMTprediction <- (1 - Fst)*(((1/sqrt(n-nb_pop)) + (1/sqrt(L)))**2)
 
 
   return(list(Zs = Zs, Zst=Zst, Fst=Fst, Fst_approximation=Fst_approximation, leadingeigenZs=leadingeigenZs, RMTprediction=RMTprediction, eigenZs=pc_z_s$sdev^2/L, eigenZst=pc_z_st$sdev^2/L, eigenZ=pc_z$sdev^2/L, pcZs = pc_z_s$x[,1:2], pcZst = pc_z_st$x[,1:2], pcZ = pc_z$x[,1:2]))
