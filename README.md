@@ -1,4 +1,4 @@
-# spectraltheory
+# spectralfst
 
 ## Summary
 
