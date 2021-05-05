@@ -16,45 +16,62 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette aims at showing some results presented in the paper "A Spectral Theory for Wright's Inbreeding Coefficients and Related Quantities". This vignette is composed of 2 big parts.
+This vignette aims at showing some results presented in the paper "A Spectral Theory for Wright's Inbreeding Coefficients and Related Quantities". 
 
-* The first part apply spectral theory on datas coming from a F model with 3 populations. There are several steps in this part : 
-+ Simulation of the datas using F model with 3 populations
-+ Computing the average value of Wright’s FST over all loci included in the genotype matrix using Wright's formula (this can be computed using the package function **mean_wright_fst** )
-+ Computing the average value of Wright’s FST over all loci included in the genotype matrix using the squared norm of the between population matrix Zst (this can be computed using the package function **compute_partition**)
-+ Computing several quantities of interests
-+ scree plot anf projection of PCA from matrix Z, Zs and Zst
+**Summary** : The R package `spectralfst` implements method to compute Wright's inbreeding coefficient using principal component analysis (PCA).  PCA is the most-frequently used approach to describe population genetic structure from large population genomic data sets. In this vignette, we show that PCA computes the average value of Wright’s inbreeding coefficient over the loci included in the genotype matrix. Our result shows that inbreeding coefficients and PCA eigenvalues provide equivalent descriptions of population structure. As a consequence, PCA extends the definition of this coefficient beyond the framework of allelic frequencies as we will see in a second part.
 
-* The aim of the second part is to show the usefulness of spectral theory in order to compute Fst of surrogate genotype. In this example, we're going to use genotype data coming from Arabidopsis Thaliana and the goal is to obtain the Fst after removing adaptive genetic variation associated with environmental variables (Bioclim 1 to 18 coming from WorldClim database). This can be done using the *make_adjustment* and *adjusting_variables* parameters from the **compute_partition** function.
-
-The only required package is *spectral_fst*
 
 ```{r}
 library(spectralfst)
 ```
 
+## Principle of the methods
 
-# I - F model with 3 populations 
+To establish relationships between PCA and inbreeding coefficients, we decompose the centered genotype matrix $Z$ into a sum of two matrices : $$Z = Z_{S} + Z_{ST}$$
 
-## Data simulation
++ $Z_{S}$ is the within population matrix and it should be thought of as the matrix that accounts for intra-population genetic variation
 
-Here, we use a F model with 3 populations to simulate our datas. The simulated datas has been obtained using the function fmodel_simulation with default parameters *fmodel_simulation(n=150, L=20000, c_vector=c(1/3,1/3,1/3), F_vector=c(0.3,0.2,0.1))*
++ $Z_{ST}$ is the between population matrix and it should be thought of as the matrix that accounts for inter-population genetic variation
+
+For K population, the main theorem is :
+
+**Theorem 1** : Let $K \geq 2$. $Z_{ST}^{sc}$ is the scaled version of $Z_{ST}$. We have : 
+$$E[F_{ST}] = \sum_{k=1}^{K-1}{\rho _{k}^{2}(Z_{ST}^{sc}) / L}$$
+
+where L is the number of loci and $\rho _{k}(Z_{ST}^{sc})$ are the eigenvalues of the empirical correlation matrix, scaled PCA computes those values
+
+Moreover, we can also approximate $F_{ST}$ using $Z$ matrix. If we have what we call the separation condition : 
+$$ \sigma_{K-1}^{2}(Z_{ST}) > \sigma_{1}^{2}(Z_{S}) $$
+
+Then, we can make the following approximation : 
+$$E[F_{ST}] \approx \sum_{k=1}^{K-1}{\rho _{k}^{2}(Z^{sc}) / L}$$
+
+In other words, the mean value of $F_{ST}$ across loci can be approximated from the sum of the (K −1) leading eigenvalues of the PCA of scaled genotype matrix. We invite you to read the paper for more info on the accuracy of this approximation.
+
+## Applying spectral theory to F-models with 3 populations
+
+
+This section will illustrate the use of the `compute_partition` function on genotype datas simulated using F-models
+
+### F-models with 3 populations.
+
+F-models are models for K discrete populations diverging from an ancestral gene pool. In the ancestral gene pool, the derived allele is present with frequency $p_{ans}$. The K populations diverged from each other and from the ancestral population with drift coefficient equal to $F_{k}$ relative to the ancestral pool. For this simulation we have $F_{1} = 0.3$, $F_{2} = 0.2$ and $F_{3} = 0.1$ . We implemented F model simulation in the `spectralfst` package.The simulated datas has been obtained using the function fmodel_simulation with default parameters `fmodel_simulation(n=150, L=20000, c_vector=c(1/3,1/3,1/3), F_vector=c(0.3,0.2,0.1))`
+
 ```{r}
 data('fmodel')
 X <- fmodel$genotype
 pop <- fmodel$pop
-```
-
-
-```{r}
 dim(X)
 ```
 
 Our genotype matrix is composed of n = 150 individuals and L = 18967 loci
 
-## Average value of Wright’s FST
+### Average value of Wright’s $F_{ST}$ accross loci using Wright's formula
 
-We're going to compute average value of wright's Fst using the formula :
+At a given locus, Wright’s $F_{ST}$ can be computed using the following formula
+$$ \frac{PQ - \sum_{i=1}^{K}c_{i}p_{i}q_{i}}{PQ}$$
+
+where P is the global allele frequency, Q = 1 - P, K is the number of population, $c_{i}$ is the proportion of individuals coming from population i, $p_{i}$ is the allele frequency for population i and $q_{i}$ = 1 - $p_{i}$. The function `mean_wright_fst` compute the average value of Wright's inbreeding coefficient over the loci included in the genotype matrix using the wright's formula.
 
 ```{r}
 fst_wright <- mean_wright_fst(X, pop)
@@ -62,7 +79,12 @@ print("Wright's formula gives a mean fst of : ")
 fst_wright
 ```
 
-and using the spectral theory, more specifically using the squared norm of the between population matrix
+The mean value is 0.1318689. We will see that we will obtain exactly the same value using the `compute_partition` function.
+
+### Average value of Wright’s $F_{ST}$ accross loci using spectral theory
+
+We will now use `compute_partition` function. This function will compute $Z_{S}$ and $Z_{ST}$. We will obtain the $F_{ST}$ by applying PCA on $Z_{ST}^{sc}$ and by summing the first and second eigenvalue. 
+
 
 ```{r}
 spectral_fst <- compute_partition(X, pop)
@@ -70,72 +92,117 @@ print("Fst compute with between population matrix Zst")
 spectral_fst$Fst
 ```
 
-Those 2 values are strictly equal and will be equal for any case
-
-## Related quantities
-
-We can obtain a Fst approximation by computing the centered scaled PCA of genotype matrix
+As expected the mean value of $F_{ST}$ is 0.1318689. We can also check the separation condition thanks to our function
 
 ```{r}
-print("Fst approximation using Z matrix")
-spectral_fst$Fst_approximation
-```
-
-We also can obtain the leading eigenvalue of Zs matrix
-
-```{r}
-print("The leading eigenvalue of Zs matrix is :")
+print("smallest non null eigenvalue of Zst")
+spectral_fst$eigenZst[2]
+print("leading eigenvalue of Zs")
 spectral_fst$leadingeigenZs
 ```
+
+We can clearly see that $\sigma_{K-1}^{2}(Z_{ST}) > \sigma_{1}^{2}(Z_{S})$. The residual variation not explained by the discrete population model should be contained in matrix $Z_{S}$. One assumption that we've made is that the leading eigenvalue of $Z_{S}$ can be approximate thanks to random matrix theory. More precisely, the leading eigenvalue of $Z_{S}/\sqrt{n}$ is of order $(1/\sqrt{n} + 1/\sqrt{L})^2$
 
 ```{r}
 print("The RMT prediction of the leading eigenvalue of Zs is : ")
 spectral_fst$RMTprediction
 ```
 
-## PC plots of Z, Zs and Zst
+Under those assumption, we state that it is possible to approximate the mean value of $F_{ST}$ across loci from the sum of the (K −1) leading eigenvalues of the PCA of scaled genotype matrix. We can check if it is the case with the simulated f model.
 
-For Z (i.e genotype) matrix
+```{r}
+print("Fst approximation using Z matrix")
+spectral_fst$Fst_approximation
+```
+
+The $F_{ST}$ approximation is 0.131951, it is very close from the true value 0.1318689
+
+### PCA scree plots and PC plots
+
+We will give the PCA scree plots and PC plots for the scaled matrix $Z^{sc}$, for the between population matrix $Z_{ST}^{sc}$, and for the residual matrix $Z_{S}^{sc}$
+
++ For $Z^{sc}$
 
 ```{r, fig.show='hold'}
 plot(spectral_fst$eigenZ[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
 plot(spectral_fst$pcZ, col = pop, main="PC Plot")
 ```
 
-For Zst matrix : 
++ For $Z_{ST}^{sc}$
 
 ```{r, fig.show='hold'}
 plot(spectral_fst$eigenZst[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
 plot(spectral_fst$pcZst, col = pop, main="PC Plot")
 ```
 
-It is important to notice that in the case of Fmodel, these plots are really close
+As expected, scree plot and projection are very close for those 2 matrices.
 
-For Zs matrix : 
++ For $Z_{S}^{sc}$
 
 ```{r, fig.show='hold'}
 plot(spectral_fst$eigenZs[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
 plot(spectral_fst$pcZs, col = pop, main="PC Plot")
 ```
 
-# II - Fst computation after removing  adaptive genetic variation associated with environmental variables
+Thanks to the projection, we can clearly see that there is no remaining structure in the residual matrix $Z_{S}^{sc}$. This can be thought of as an informal test to check if there is misspecification in our population labels as we will see in the next part.
 
-## Loading datas
+### Spectral analysis with incorrectly labelled population samples
 
+For the same genotype matrix as in Figure 1, samples from populations 1 and 2 will be group against population 3.
 
-
-```{r}{r setup, include = FALSE}
-# For some reason, you'll sometimes need to compute load_all() function in order to load correctly datasets
-# see https://github.com/r-lib/devtools/issues/419 for more infos
-#load_all()
+```{r}
+pop <- c(rep(1,100), rep(2,50))
 ```
+
+```{r}
+fst_wright <- mean_wright_fst(X, pop)
+print("Wright's formula gives a mean fst of : ")
+fst_wright
+
+spectral_fst <- compute_partition(X, pop)
+print("Fst compute with between population matrix Zst")
+spectral_fst$Fst
+```
+
+We still have the equality between wright's formula and leading eigenvalue of $Z_{ST}$, as we prove that this equality is valid in any case. 
+
+```{r}
+print("smallest non zero eigenvalue of Zst")
+spectral_fst$eigenZst[1]
+print("leading eigenvalue of Zs")
+spectral_fst$leadingeigenZs
+print("The RMT prediction of the leading eigenvalue of Zs is : ")
+spectral_fst$RMTprediction
+print("Fst approximation using Z matrix")
+spectral_fst$Fst_approximation
+```
+
+The leading value of $Z_{S}^{sc} / \sqrt{n}$ did not verify the separation condition and it differs from its RMT prediction. As a result, the average $F_{ST}$ fails to approximate the first eigenvalue of the PCA.
+
+```{r, fig.show='hold'}
+plot(spectral_fst$eigenZs[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
+plot(spectral_fst$pcZs, col = pop, main="PC Plot")
+```
+
+On the PC plot of the residual matrix $Z_{s}$ we can now clearly see the remaining structure.
+
+## Fst computation after removing  adaptive genetic variation associated with environmental variables
+
+Besides an interest in connecting population genetic theory to the spectrum of the genotype matrix, the results have important consequences for data analysis. One limitation of the Wright's formula is that it requires to have access to allele frequency. The main interest of the spectral theory is the straightforward extension to adjusted genotypic matrices, providing statistics analogous to $F_{ST}$ for modified genotypic values. We will illustrate this using Arabisdopsis Thaliana data
 
 ```{r}
 data('athaliana')
 ```
-## Computing Fst on the genotype matrix without adjustment
 
-First, we're not realizing any adjustment.
+The athaliana object is composed of three components : 
+
++ *genotype* : A matrix of 241 rows and 10 000 columns. It corresponds to 241 swedish plant accessions from The 1,001 Genomes database for Arabidopsis thaliana. The 10,000 filtered SNPs were randomly selected from a large set of variants. The matrix contains no missing genotypes.
+
++ *pop* : A vector of length 241. The i-th element corresponds to the population of the i-th individuals. The  individuals  were  clustered  in  groups  based  on  analysis  of  population structure accounting for geographic proximity.
+
++ *bio* : A matrix of 241 rows and 18 columns. Global climate and weather data corresponding to individual geographic coordinates were downloaded from the World-Clim  database  (https://worldclim.org).   Eighteen  bioclimatic  variables,  derived from the monthly temperature and rainfall values,  were considered as representing the current environmental matrix.
+
+First of all, we will compute the "classic" $F_{ST}$ (i.e without adjustment)
 
 ```{r}
 spectral_athaliana <- compute_partition(athaliana$genotype, athaliana$pop)
@@ -145,27 +212,40 @@ print("mean Fst compute with Wright's formula :")
 wright_fst_athaliana
 print("Fst compute with between population matrix Zst")
 spectral_athaliana$Fst
+print("smallest non zero eigenvalue of Zst")
+spectral_athaliana$eigenZst[1]
+print("leading eigenvalue of Zs")
+spectral_athaliana$leadingeigenZs
+print("The RMT prediction of the leading eigenvalue of Zs is : ")
+spectral_athaliana$RMTprediction
 print("Fst approximation using Z matrix")
 spectral_athaliana$Fst_approximation
 ```
 
-## Adjusting for adaptive genetic variation associated with environmental variables 
+For the moment we made no adjustsment, hence we still have access to allele frequency and it is still possible to use Wright's formula to compute $F_{st}$. Once again we can notice that the two methods (spectral theory and Wright) to compute $F_{st}$ are strictly equivalent. We can see that the separation condition is verified. However RMT failed to predict the leading eigenvalue of Zs indicating that there is remaining structure contained in $Z_{s}$. Hence, we can observe a mismatch between the $F_{st}$ approximation and the true value of $F_{st}$.
 
-We're now going to use the make_adjustment and adjusting_variables parameters. The adjusting_variables will be composed of the 18 Bioclim variables. It must be a n (= number of individuals) x D (= number of environmental variables) matrix. In our specific case, the matrix has 241 rows and 18 columns
+We will now use the `adjusting_variables` parameter of the `compute_partition` function. Basically, For the matrix of centered genotypes, Z, and the matrix of eighteen bioclimatic variables, Y, the program estimated a matrix of surrogate genotypes, W, by adjusting a regression model of the form 
+$$
+{\bf Z} = {\bf Y} {\bf B}^T +  {\bf W} + \epsilon \, .
+$$  
+To keep the latent matrix estimate (W) as close as possible to Z, we used k = n − 19 = 222 factors to compute W. We will now compute the $F_{st}$ on the matrix $Z^{adj} = W + \epsilon$. This $F_{st}$ can be thought of as the $F_{st}$ of the genotype obtained after removing  adaptive genetic variation associated with environmental variables.
 
 ```{r}
-spectral_adjusted_athaliana <- compute_partition(athaliana$genotype, athaliana$pop, Y =athaliana$bio)
+spectral_adjusted_athaliana <-compute_partition(athaliana$genotype, athaliana$pop, Y =athaliana$bio)
 
 print("Fst compute with between population matrix Zst")
 spectral_adjusted_athaliana$Fst
+print("smallest non zero eigenvalue of Zst")
+spectral_adjusted_athaliana$eigenZst[1]
+print("leading eigenvalue of Zs")
+spectral_adjusted_athaliana$leadingeigenZs
+print("The RMT prediction of the leading eigenvalue of Zs is : ")
+spectral_adjusted_athaliana$RMTprediction
 print("Fst approximation using Z matrix")
 spectral_adjusted_athaliana$Fst_approximation
 ```
 
-We can see that removing adaptive genetic variation has logically led to a decrease of Fst value
-
-## Figures
-
+We can see that the separation condition is not verified. We will plot the results.
 
 Proportion of variance explained by PC axes before adjustment of genotypes for environmental variables (blue color) and after adjustment (orange color).
 
@@ -188,8 +268,6 @@ legend(x = 3.5, y = 0.081,
        cex = 1)
 ```
 
-
-
 Proportion of variance explained by the first axis of the between-population matrix, and by the first axes ofthe residual matrix (five components) before adjustment for environmental variables(blue color) and after adjustment (orange color). 
 
 ```{r, fig.width = 7, fig.height = 7}
@@ -211,8 +289,5 @@ legend(x = 3.5, y = 0.077,
        pch = 19,
        cex = 1)
 ```
-
-
-
 
 

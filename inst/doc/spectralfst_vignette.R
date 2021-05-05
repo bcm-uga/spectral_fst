@@ -11,8 +11,6 @@ library(spectralfst)
 data('fmodel')
 X <- fmodel$genotype
 pop <- fmodel$pop
-
-## ------------------------------------------------------------------------
 dim(X)
 
 ## ------------------------------------------------------------------------
@@ -26,16 +24,18 @@ print("Fst compute with between population matrix Zst")
 spectral_fst$Fst
 
 ## ------------------------------------------------------------------------
-print("Fst approximation using Z matrix")
-spectral_fst$Fst_approximation
-
-## ------------------------------------------------------------------------
-print("The leading eigenvalue of Zs matrix is :")
+print("smallest non null eigenvalue of Zst")
+spectral_fst$eigenZst[2]
+print("leading eigenvalue of Zs")
 spectral_fst$leadingeigenZs
 
 ## ------------------------------------------------------------------------
 print("The RMT prediction of the leading eigenvalue of Zs is : ")
 spectral_fst$RMTprediction
+
+## ------------------------------------------------------------------------
+print("Fst approximation using Z matrix")
+spectral_fst$Fst_approximation
 
 ## ---- fig.show='hold'----------------------------------------------------
 plot(spectral_fst$eigenZ[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
@@ -44,6 +44,32 @@ plot(spectral_fst$pcZ, col = pop, main="PC Plot")
 ## ---- fig.show='hold'----------------------------------------------------
 plot(spectral_fst$eigenZst[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
 plot(spectral_fst$pcZst, col = pop, main="PC Plot")
+
+## ---- fig.show='hold'----------------------------------------------------
+plot(spectral_fst$eigenZs[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
+plot(spectral_fst$pcZs, col = pop, main="PC Plot")
+
+## ------------------------------------------------------------------------
+pop <- c(rep(1,100), rep(2,50))
+
+## ------------------------------------------------------------------------
+fst_wright <- mean_wright_fst(X, pop)
+print("Wright's formula gives a mean fst of : ")
+fst_wright
+
+spectral_fst <- compute_partition(X, pop)
+print("Fst compute with between population matrix Zst")
+spectral_fst$Fst
+
+## ------------------------------------------------------------------------
+print("smallest non zero eigenvalue of Zst")
+spectral_fst$eigenZst[1]
+print("leading eigenvalue of Zs")
+spectral_fst$leadingeigenZs
+print("The RMT prediction of the leading eigenvalue of Zs is : ")
+spectral_fst$RMTprediction
+print("Fst approximation using Z matrix")
+spectral_fst$Fst_approximation
 
 ## ---- fig.show='hold'----------------------------------------------------
 plot(spectral_fst$eigenZs[1:10] * 100, ylab="variance (%)", main="Scree plot", ylim=c(0,8))
@@ -60,14 +86,26 @@ print("mean Fst compute with Wright's formula :")
 wright_fst_athaliana
 print("Fst compute with between population matrix Zst")
 spectral_athaliana$Fst
+print("smallest non zero eigenvalue of Zst")
+spectral_athaliana$eigenZst[1]
+print("leading eigenvalue of Zs")
+spectral_athaliana$leadingeigenZs
+print("The RMT prediction of the leading eigenvalue of Zs is : ")
+spectral_athaliana$RMTprediction
 print("Fst approximation using Z matrix")
 spectral_athaliana$Fst_approximation
 
 ## ------------------------------------------------------------------------
-spectral_adjusted_athaliana <- compute_partition(athaliana$genotype, athaliana$pop, Y =athaliana$bio)
+spectral_adjusted_athaliana <-compute_partition(athaliana$genotype, athaliana$pop, Y =athaliana$bio)
 
 print("Fst compute with between population matrix Zst")
 spectral_adjusted_athaliana$Fst
+print("smallest non zero eigenvalue of Zst")
+spectral_adjusted_athaliana$eigenZst[1]
+print("leading eigenvalue of Zs")
+spectral_adjusted_athaliana$leadingeigenZs
+print("The RMT prediction of the leading eigenvalue of Zs is : ")
+spectral_adjusted_athaliana$RMTprediction
 print("Fst approximation using Z matrix")
 spectral_adjusted_athaliana$Fst_approximation
 
