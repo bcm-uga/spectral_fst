@@ -66,6 +66,8 @@ dim(X)
 
 Our genotype matrix is composed of n = 150 individuals and L = 18967 loci
 
+
+
 ### Average value of Wright’s $F_{ST}$ accross loci using Wright's formula
 
 At a given locus, Wright’s $F_{ST}$ can be computed using the following formula

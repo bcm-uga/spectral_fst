@@ -1,3 +1,65 @@
+#' @title spectralfst
+#
+#' @description This function computes wright's fixation index using coefficient of determination obtained from the regression of genotype on the population labels
+#'
+#' @param genotype A matrix of genotypes with n rows and L columns, where n is number of individuals and L is the number of loci. Genotypes can be
+#' haploid (0,1) or diploid (0,1,2). Missing values are not allowed.
+#' @param population_labels A vector of length n containing population labels for each sample in the genotype matrix. Population labels are integers
+#' @param Y A matrix of covariates with n rows and d columns, where d is the number of covariates. The values are used to compute an adjusted estimate of Fst. Missing values are not allowed. If \code{NULL}, then spectral estimates are unadjusted.
+#' @param adjustment_type A value 1 or 2. If adjustment_type = 1, then you will obtain Fst from matrix BX. If adjustment_type = 2, then you will obtain Fst from matrix W + \epsilon
+#'
+#' @return spectralfst
+#' spectralfst : A vector of size L, with the corresponding value of Fst for each locus
+
+spectralfst <- function(genotype, population_labels, Y=NULL, adjustment_type=2){
+  diploid <- FALSE
+  if (2 %in% genotype){
+    diploid <- TRUE
+    haploid_object <- haploidisation(genotype, population_labels)
+    genotype <- haploid_object$haploid_matrix
+    population_labels <- haploid_object$haploid_population_labels
+  }
+
+  # store mean and sd for each column
+  colmean <- colMeans(genotype)
+  colsd <- apply(genotype, 2, sd)
+  # We get rid of null sd or null mean column
+  nonnullsd <- colsd != 0
+  nonnullmean <- colmean != 0
+  genotype <- genotype[,(nonnullsd | nonnullmean)]
+  colmean <- colmean[(nonnullsd | nonnullmean)]
+  colsd <- colsd[(nonnullsd | nonnullmean)]
+  # store n and L values
+  n <- dim(genotype)[1]
+  L <- dim(genotype)[2]
+
+  if (! is.null(Y)){
+    nb_var <- ncol(Y)
+    if (diploid){
+      lfmm_genotype <- lfmm2(genotype, Y, (n/2)-(nb_var + 1))
+    }else{
+      lfmm_genotype <- lfmm2(genotype, Y, n-(nb_var + 1))
+    }
+
+
+    mod.lm <- lm(genotype ~ ., data=data.frame(Y, lfmm_genotype@U))
+    sm <- summary(mod.lm)
+    effect.size <- sapply(sm, FUN = function(x) x$coeff[1:(nb_var + 1), 1])
+    Y <- cbind(rep(1.0, n), Y)
+    if (adjustment_type == 2){
+      genotype <- genotype - Y %*% effect.size
+    }else{
+      genotype <- Y %*% effect.size
+    }
+  }
+
+  genotype <- scale(genotype)
+  s <- summary(lm(genotype ~ as.factor(as.numeric(population_labels))))
+  fst <- sapply(s, FUN = function(smr) smr$r.squared)
+  return(fst)
+}
+
+
 
 #' @title compute_partition
 #
@@ -71,9 +133,11 @@ compute_partition <- function(genotype, population_labels, Y=NULL){
   colmean <- colMeans(genotype)
   colsd <- apply(genotype, 2, sd)
   # We get rid of potential 0 variance column
-  genotype <- genotype[,colsd != 0]
-  colmean <- colmean[colsd != 0]
-  colsd <- colsd[colsd != 0]
+  nonnullsd <- colsd != 0
+  nonnullmean <- colmean != 0
+  genotype <- genotype[,(nonnullsd | nonnullmean)]
+  colmean <- colmean[(nonnullsd | nonnullmean)]
+  colsd <- colsd[(nonnullsd | nonnullmean)]
   # Updata of L values in case of column deletion
   L <- dim(genotype)[2]
 
@@ -160,6 +224,19 @@ mean_wright_fst <- function(genotype, population_labels){
   # pop_distribution stores
   pop_count <- table(population_labels)
   pop_distribution <- pop_count / sum(pop_count)
+
+  # store n and L values
+  n <- dim(genotype)[1]
+  L <- dim(genotype)[2]
+  # store mean and sd for each column
+  colmean <- colMeans(genotype)
+  colsd <- apply(genotype, 2, sd)
+  # We get rid of potential 0 variance column
+  nonnullsd <- colsd != 0
+  nonnullmean <- colmean != 0
+  genotype <- genotype[,(nonnullsd | nonnullmean)]
+  colmean <- colmean[(nonnullsd | nonnullmean)]
+  colsd <- colsd[(nonnullsd | nonnullmean)]
 
   # store n and L values
   n <- dim(genotype)[1]
