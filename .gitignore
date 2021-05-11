@@ -8,7 +8,10 @@
 spectralfst.Rproj
 
 R/.Rapp.history
+R/test.r
+
 inst/doc
+data/.DS_Store
 
 readme_changes.txt
 
