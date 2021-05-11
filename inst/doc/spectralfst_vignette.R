@@ -136,8 +136,7 @@ plot(seq(1,12)/2,as.numeric(t(m)),
      ylab = "Proportion of variance",
      xlab = "Axis",
     # main = "Structure Components",
-     cex.axis = 2,
-    cex = 2,
+     cex.axis = .8,
      las = 1)
 
 legend(x = 3.5, y = 0.077, 
@@ -145,7 +144,7 @@ legend(x = 3.5, y = 0.077,
        col = c("darkblue","orange"),
        lty = c(1,1),
        pch = 19,
-       cex = 2)
+       cex = 1)
 
 ## -----------------------------------------------------------------------------------------------------------------------------
 #Smallest non zero eigenvalue of Zst
