@@ -1,14 +1,14 @@
 # spectralfst
 
 ## Summary
+This package computes spectral estimates of inbreeding coefficients and performs analysis of population structure for adjusted or unadjusted genotype matrices
 
-A package to compute values and matrices of interest described in the paper "A Spectral Theory for Wright’s Inbreeding Coefficients and Related Quantities" François et Gain 2020. It allows you to compute Fst of surrogate genotype. For instance, you can obtain the Fst after removing adaptive genetic variation associated with environmental variables.
 
 ## Package overview
 
 The main function of the package is
 
-* **compute_partition** Computing partition matrices and related quantities from spectral theory
+* **compute_partition** Computing partition matrices and spectral estimates of inbreeding coefficients
 
 
 ## Installation
@@ -21,4 +21,4 @@ devtools::install_github("bcm-uga/spectralfst")
 
 ## References
 
-- Olivier François, Clément Gain. (2021). A Spectral Theory for Wright’s Inbreeding Coefficients and Related Quantities. In review.
+- Olivier François, Clément Gain. (2021). A Spectral Theory for Wright’s Inbreeding Coefficients and Related Quantities. BioRxiv doi:10.1101/2020.10.07.329755 

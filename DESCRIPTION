@@ -1,11 +1,11 @@
 Package: spectralfst
 Type: Package
-Title: Spectral Theory for Wright’s Inbreeding Coefficients and Related
+Title: Spectral Estimates of Inbreeding Coefficients and Related
         Quantities
-Version: 0.1.0
+Version: 0.1.1
 Author: Clement Gain
 Maintainer: Clement Gain <clement.gain@univ-grenoble-alpes.fr>
-Description: This package allows you to compute values and matrices of interest describe in the paper "A Spectral Theory for Wright’s Inbreeding Coefficients and Related Quantities"
+Description: This package computes spectral estimates of inbreeding coefficients and performs analysis of population structure for adjusted or unadjusted genotype matrices
 License: What license is it under?
 Encoding: UTF-8
 VignetteBuilder: knitr
